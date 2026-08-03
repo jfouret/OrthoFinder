@@ -102,7 +102,7 @@ def DoOrthogroups(
         speciesXML=None,
         i_unassigned=None,
         GRACE_PERIOD = 10.,
-        STALL_TIMEOUT = 1200.
+        STALL_TIMEOUT = 43200.
     ):
 
     # Run Algorithm, cluster and output cluster files with original accessions
@@ -124,10 +124,10 @@ def DoOrthogroups(
     blastDir_list = files.FileHandler.GetBlastResultsDir()
     if q_unassigned:
         blastDir_list = blastDir_list[:1]  # only use latet directory with unassigned gene searches
-    
+
     files.FileHandler.GetPickleDir()  # create the pickle directory before the parallel processing to prevent a race condition
     if options.old_version:
-        cmd_queue = mp.Queue()  
+        cmd_queue = mp.Queue()
         for iSpeciesJob in range(seqsInfo.nSpecies):  # The i-th job, not the OrthoFinder species ID
             cmd_queue.put(iSpeciesJob)
 
@@ -158,13 +158,13 @@ def DoOrthogroups(
         parallel_task_manager.ManageQueue(runningProcesses, cmd_queue)
     else:
 
-        cmd_queue = mp.Queue()  
+        cmd_queue = mp.Queue()
         for iSpeciesJob in range(seqsInfo.nSpecies):  # The i-th job, not the OrthoFinder species ID
             cmd_queue.put(iSpeciesJob)
 
         for _ in range(options.nProcessAlg):
             cmd_queue.put(None)
-        
+
         total_tasks = seqsInfo.nSpecies
         # progressbar, task = util.get_progressbar(total_tasks)
         # update_cycle = 1
@@ -189,10 +189,10 @@ def DoOrthogroups(
         ]
 
         parallel_task_manager.ManageQueueNew(
-            runningProcesses, 
-            total_tasks, 
-            options.nProcessAlg, 
-            result_queue, 
+            runningProcesses,
+            total_tasks,
+            options.nProcessAlg,
+            result_queue,
             GRACE_PERIOD = GRACE_PERIOD,
             STALL_TIMEOUT = STALL_TIMEOUT
         )
@@ -206,7 +206,7 @@ def DoOrthogroups(
                 cmd_queue.put((seqsInfo, iSpecies))
             # args_list = [(cmd_queue, files.FileHandler.GetPickleDir(), options.v2_scores) for i_ in range(options.nProcessAlg)]
             # parallel_task_manager.RunParallelMethods(waterfall.WaterfallMethod.Worker_ConnectCognates, args_list, options.nProcessAlg)
-            
+
             runningProcesses = [
                 mp.Process(
                     target=waterfall.WaterfallMethod.Worker_ConnectCognates,
@@ -232,23 +232,23 @@ def DoOrthogroups(
                 mp.Process(
                     target=waterfall.WaterfallMethod.Worker_ConnectCognates_New,
                     args=(
-                        cmd_queue,  
-                        result_queue, 
-                        files.FileHandler.GetPickleDir(), 
+                        cmd_queue,
+                        result_queue,
+                        files.FileHandler.GetPickleDir(),
                         options.v2_scores
                     ),
                 )
                 for i_ in range(options.nProcessAlg)
             ]
             parallel_task_manager.ManageQueueNew(
-                runningProcesses, 
-                total_tasks, 
-                options.nProcessAlg, 
-                result_queue, 
+                runningProcesses,
+                total_tasks,
+                options.nProcessAlg,
+                result_queue,
                 GRACE_PERIOD = GRACE_PERIOD,
                 STALL_TIMEOUT = STALL_TIMEOUT
             )
- 
+
         graphFilename = waterfall.WaterfallMethod.WriteGraphParallel(
             WriteGraph_perSpecies, seqsInfo, options.nProcessAlg, i_unassigned
         )
@@ -323,15 +323,15 @@ def post_clustering_orthogroups(
     else:
         try:
             idsDict = mcl.IDFullDict(
-                [files.FileHandler.GetSequenceIDsFN()], 
+                [files.FileHandler.GetSequenceIDsFN()],
                 func=util.FirstWordExtractor
             )
         except:
             idsDict = mcl.IDFullDict(
-                [files.FileHandler.GetSequenceIDsFN()], 
+                [files.FileHandler.GetSequenceIDsFN()],
                 func=util.FullAccession
             )
-    
+
     ## --------- this doesn't need to run at this point with the new process --------
     if not options.fix_files:
         if not q_incremental:
@@ -375,7 +375,7 @@ def post_clustering_orthogroups(
         d_seqs = files.FileHandler.GetResultsSeqsDir()
         if not os.path.exists(d_seqs):
             os.mkdir(d_seqs)
-        qResults = True 
+        qResults = True
 
     treeGen.WriteFastaFiles(fastaWriter, ogSet.OGsAll(), idsDict, qID=True, qResults=qResults)
 
