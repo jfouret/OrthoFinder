@@ -2152,7 +2152,7 @@ def RunOrthologsParallel(
         fix_files=False,
         fd_limit=None,
         GRACE_PERIOD=10.0,
-        STALL_TIMEOUT=1200.0,
+        STALL_TIMEOUT=43200.0,
     ):
     """
     Run the ortholog analysis in parallel using multiprocessing.

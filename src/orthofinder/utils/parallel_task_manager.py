@@ -40,7 +40,7 @@ try:
     from rich import print
 except ImportError:
     ...
-    
+
 try:
     width = os.get_terminal_size().columns
 except OSError as e:
@@ -59,7 +59,7 @@ except ImportError:
 
 def setup_environment():
 
-    os.environ["OPENBLAS_NUM_THREADS"] = "1"    # fix issue with numpy/openblas. Will mean that single threaded options aren't automatically parallelised 
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"    # fix issue with numpy/openblas. Will mean that single threaded options aren't automatically parallelised
 
     my_env = os.environ.copy()
     # use orthofinder supplied executables by preference
@@ -80,19 +80,19 @@ def setup_environment():
     if conda_prefix:
         conda_bin = os.path.join(conda_prefix, "Scripts") if os.name == "nt" else os.path.join(conda_prefix, "bin")
         my_env["PATH"] = conda_bin + os.pathsep + my_env["PATH"]
-    
+
     return my_env
 
 my_env = setup_environment()
 
-# Fix LD_LIBRARY_PATH when using pyinstaller 
+# Fix LD_LIBRARY_PATH when using pyinstaller
 if getattr(sys, 'frozen', False):
     if 'LD_LIBRARY_PATH_ORIG' in my_env:
-        my_env['LD_LIBRARY_PATH'] = my_env['LD_LIBRARY_PATH_ORIG']  
+        my_env['LD_LIBRARY_PATH'] = my_env['LD_LIBRARY_PATH_ORIG']
     else:
-        my_env['LD_LIBRARY_PATH'] = ''  
+        my_env['LD_LIBRARY_PATH'] = ''
     if 'DYLD_LIBRARY_PATH_ORIG' in my_env:
-        my_env['DYLD_LIBRARY_PATH'] = my_env['DYLD_LIBRARY_PATH_ORIG']  
+        my_env['DYLD_LIBRARY_PATH'] = my_env['DYLD_LIBRARY_PATH_ORIG']
     else:
         my_env['DYLD_LIBRARY_PATH'] = ''
 
@@ -120,9 +120,9 @@ def PrintNoNewLine(text):
 
 def ManageQueue(runningProcesses, cmd_queue):
     """Manage a set of runningProcesses working through cmd_queue.
-    If there is an error the exit all processes as quickly as possible and 
+    If there is an error the exit all processes as quickly as possible and
     exit via Fail() methods. Otherwise return when all work is complete
-    """            
+    """
     # set all completed processes to None
     qError = False
 #    dones = [False for _ in runningProcesses]
@@ -314,9 +314,9 @@ def Worker_RunMethod(Function, args_queue):
             return
 
 def RunMethodParallel(
-        Function, 
-        args_queue, 
-        nProcesses, 
+        Function,
+        args_queue,
+        nProcesses,
     ):
 
     runningProcesses = [
@@ -328,14 +328,14 @@ def RunMethodParallel(
     ManageQueue(runningProcesses, args_queue)
 
 def ManageQueueNew(
-        runningProcesses, 
-        total_tasks, 
-        nprocess, 
-        result_queue, 
+        runningProcesses,
+        total_tasks,
+        nprocess,
+        result_queue,
         GRACE_PERIOD = 10.,
-        STALL_TIMEOUT = 200.
+        STALL_TIMEOUT = 3600.
     ):
-    
+
     progressbar, task = util.get_progressbar(total_tasks)
     update_cycle = 1
     progressbar.start()
@@ -388,8 +388,8 @@ def ManageQueueNew(
             result_queue.close()
             result_queue.join_thread()
         except Exception:
-            pass            
-    
+            pass
+
     if fatal:
         util.Fail()
 
